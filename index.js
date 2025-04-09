@@ -21,14 +21,25 @@ app.get('/api/products', async (req, res) => {
         'Authorization': `Bearer ${PRINTIFY_TOKEN}`
       }
     });
-    res.json(response.data);
+    
+    // Transformez les données pour inclure les bons prix
+    const productsWithCorrectPrices = response.data.products.map(product => {
+      // Conservez les données du produit mais assurez-vous que les prix sont corrects
+      return {
+        ...product,
+        variants: product.variants.map(variant => ({
+          ...variant,
+          // Ici vous pouvez ajuster le prix si nécessaire
+          price: variant.price,
+          title: variant.title,
+          options: variant.options
+        }))
+      };
+    });
+    
+    res.json(productsWithCorrectPrices);
   } catch (error) {
     console.error('Erreur lors de la récupération des produits:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération des produits' });
   }
-});
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Serveur en écoute sur le port ${port}`);
 });
